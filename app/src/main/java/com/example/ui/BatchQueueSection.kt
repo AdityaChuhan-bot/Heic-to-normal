@@ -20,7 +20,6 @@ import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.HourglassTop
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -55,10 +54,10 @@ import com.example.ui.theme.AmberWarning
 import com.example.ui.theme.CoralError
 import com.example.ui.theme.ElectricSky
 import com.example.ui.theme.EmeraldSuccess
+import com.example.ui.theme.HairlineBorder
 import com.example.ui.theme.MintTeal
-import com.example.ui.theme.SlateBorder
-import com.example.ui.theme.SlateCardBg
-import com.example.ui.theme.SlateCardVariant
+import com.example.ui.theme.ObsidianCard
+import com.example.ui.theme.ObsidianCardElevated
 import com.example.ui.theme.TextMuted
 import com.example.ui.theme.TextPrimary
 import com.example.ui.theme.TextSecondary
@@ -87,17 +86,17 @@ fun BatchQueueSection(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .border(1.dp, SlateBorder.copy(alpha = 0.5f), RoundedCornerShape(20.dp)),
-        colors = CardDefaults.cardColors(containerColor = SlateCardBg),
-        shape = RoundedCornerShape(20.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .border(1.dp, HairlineBorder, RoundedCornerShape(24.dp)),
+        colors = CardDefaults.cardColors(containerColor = ObsidianCard),
+        shape = RoundedCornerShape(24.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(18.dp)
         ) {
-            // Header with batch progress
+            // Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -105,7 +104,7 @@ fun BatchQueueSection(
             ) {
                 Column {
                     Text(
-                        text = "Conversion Queue (${queue.size})",
+                        text = "Active Conversion Queue",
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
                             color = TextPrimary
@@ -113,15 +112,18 @@ fun BatchQueueSection(
                     )
                     Text(
                         text = when {
-                            isProcessing -> "Converting $processingCount item(s)... • $queuedCount remaining"
-                            isPaused -> "Queue paused • $queuedCount queued"
-                            else -> "$completedCount completed • $failedCount failed"
+                            isProcessing -> "Converting $processingCount item(s)... ($queuedCount waiting)"
+                            isPaused -> "Queue paused ($queuedCount waiting)"
+                            else -> "$completedCount completed • $failedCount failed • $queuedCount queued"
                         },
-                        style = MaterialTheme.typography.bodySmall.copy(color = TextSecondary)
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = if (isProcessing) ElectricSky else TextSecondary,
+                            fontSize = 12.sp
+                        )
                     )
                 }
 
-                // Batch action controls
+                // Batch controls
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (isProcessing) {
                         IconButton(
@@ -156,7 +158,7 @@ fun BatchQueueSection(
                             modifier = Modifier
                                 .height(36.dp)
                                 .testTag("start_batch_button"),
-                            shape = RoundedCornerShape(8.dp),
+                            shape = RoundedCornerShape(10.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = ElectricSky)
                         ) {
                             Icon(
@@ -179,15 +181,15 @@ fun BatchQueueSection(
                                 .height(36.dp)
                                 .padding(start = 6.dp)
                                 .testTag("clear_completed_button"),
-                            shape = RoundedCornerShape(8.dp)
+                            shape = RoundedCornerShape(10.dp)
                         ) {
-                            Text("Clear Done", style = MaterialTheme.typography.labelSmall)
+                            Text("Clear", style = MaterialTheme.typography.labelSmall)
                         }
                     }
                 }
             }
 
-            // Overall Progress bar
+            // Overall Progress Bar
             if (isProcessing || overallProgress > 0f) {
                 Spacer(modifier = Modifier.height(12.dp))
                 LinearProgressIndicator(
@@ -198,13 +200,13 @@ fun BatchQueueSection(
                         .clip(RoundedCornerShape(3.dp))
                         .testTag("overall_progress_bar"),
                     color = ElectricSky,
-                    trackColor = SlateCardVariant
+                    trackColor = ObsidianCardElevated
                 )
             }
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // Item cards
+            // Queue Items
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 queue.forEach { job ->
                     QueueItemRow(
@@ -230,12 +232,12 @@ private fun QueueItemRow(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(SlateCardVariant)
+            .clip(RoundedCornerShape(14.dp))
+            .background(ObsidianCardElevated)
             .border(
                 1.dp,
-                if (isProcessing) ElectricSky.copy(alpha = 0.5f) else SlateBorder.copy(alpha = 0.3f),
-                RoundedCornerShape(12.dp)
+                if (isProcessing) ElectricSky.copy(alpha = 0.6f) else HairlineBorder,
+                RoundedCornerShape(14.dp)
             )
             .padding(12.dp)
             .testTag("queue_item_${job.id}")
@@ -251,8 +253,8 @@ private fun QueueItemRow(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
-                        .clip(RoundedCornerShape(8.dp))
+                        .size(38.dp)
+                        .clip(RoundedCornerShape(10.dp))
                         .background(if (isVideo) MintTeal.copy(alpha = 0.15f) else ElectricSky.copy(alpha = 0.15f)),
                     contentAlignment = Alignment.Center
                 ) {
@@ -276,7 +278,7 @@ private fun QueueItemRow(
                     )
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = if (isVideo) "MOV ➔ MP4" else "HEIC ➔ JPEG",
+                            text = if (isVideo) "MOV ➔ MP4" else "HEIC ➔ JPG",
                             style = MaterialTheme.typography.labelSmall.copy(
                                 color = if (isVideo) MintTeal else ElectricSky,
                                 fontWeight = FontWeight.Bold,
@@ -299,7 +301,7 @@ private fun QueueItemRow(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(6.dp))
-                                .background(SlateCardBg)
+                                .background(ObsidianCard)
                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                         ) {
                             Text(
@@ -371,7 +373,7 @@ private fun QueueItemRow(
             }
         }
 
-        // Per-item progress bar
+        // Live progress bar
         if (isProcessing) {
             Spacer(modifier = Modifier.height(8.dp))
             LinearProgressIndicator(
@@ -381,11 +383,11 @@ private fun QueueItemRow(
                     .height(4.dp)
                     .clip(RoundedCornerShape(2.dp)),
                 color = ElectricSky,
-                trackColor = SlateCardBg
+                trackColor = ObsidianCard
             )
         }
 
-        // Failure explanation
+        // Error message
         if (job.status == JobStatus.FAILED && job.errorMessage != null) {
             Spacer(modifier = Modifier.height(6.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {

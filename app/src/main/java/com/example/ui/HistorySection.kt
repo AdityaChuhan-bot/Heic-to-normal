@@ -15,12 +15,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.OpenInNew
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.VideoFile
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -34,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -45,13 +48,15 @@ import com.example.storage.SafFileManager
 import com.example.ui.theme.DarkSkyText
 import com.example.ui.theme.ElectricSky
 import com.example.ui.theme.EmeraldSuccess
+import com.example.ui.theme.HairlineBorder
 import com.example.ui.theme.MintTeal
-import com.example.ui.theme.SlateBorder
-import com.example.ui.theme.SlateCardBg
-import com.example.ui.theme.SlateCardVariant
+import com.example.ui.theme.ObsidianCard
+import com.example.ui.theme.ObsidianCardElevated
 import com.example.ui.theme.TextMuted
 import com.example.ui.theme.TextPrimary
 import com.example.ui.theme.TextSecondary
+import com.example.ui.theme.WhatsAppGreen
+import com.example.ui.theme.WhatsAppGreenDim
 
 @Composable
 fun HistorySection(
@@ -66,15 +71,15 @@ fun HistorySection(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .border(1.dp, SlateBorder.copy(alpha = 0.5f), RoundedCornerShape(20.dp)),
-        colors = CardDefaults.cardColors(containerColor = SlateCardBg),
-        shape = RoundedCornerShape(20.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .border(1.dp, HairlineBorder, RoundedCornerShape(24.dp)),
+        colors = CardDefaults.cardColors(containerColor = ObsidianCard),
+        shape = RoundedCornerShape(24.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(18.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -84,7 +89,7 @@ fun HistorySection(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
-                            .size(32.dp)
+                            .size(36.dp)
                             .clip(CircleShape)
                             .background(EmeraldSuccess.copy(alpha = 0.15f)),
                         contentAlignment = Alignment.Center
@@ -93,17 +98,26 @@ fun HistorySection(
                             imageVector = Icons.Default.History,
                             contentDescription = null,
                             tint = EmeraldSuccess,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                     Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        text = "Converted Media (${history.size})",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = TextPrimary
+                    Column {
+                        Text(
+                            text = "Converted Media Vault (${history.size})",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary
+                            )
                         )
-                    )
+                        Text(
+                            text = "Ready to open or forward to WhatsApp",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = TextSecondary,
+                                fontSize = 11.sp
+                            )
+                        )
+                    }
                 }
 
                 TextButton(
@@ -113,18 +127,18 @@ fun HistorySection(
                     Icon(
                         imageVector = Icons.Default.DeleteSweep,
                         contentDescription = null,
-                        tint = TextSecondary,
+                        tint = TextMuted,
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = "Clear",
-                        style = MaterialTheme.typography.labelSmall.copy(color = TextSecondary)
+                        style = MaterialTheme.typography.labelSmall.copy(color = TextMuted)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 history.forEach { job ->
@@ -150,9 +164,10 @@ private fun HistoryItemRow(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(SlateCardVariant)
-            .padding(12.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(ObsidianCardElevated)
+            .border(1.dp, HairlineBorder, RoundedCornerShape(16.dp))
+            .padding(14.dp)
             .testTag("history_item_${job.id}")
     ) {
         Row(
@@ -166,8 +181,8 @@ private fun HistoryItemRow(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
-                        .clip(RoundedCornerShape(8.dp))
+                        .size(42.dp)
+                        .clip(RoundedCornerShape(12.dp))
                         .background(if (isVideo) MintTeal.copy(alpha = 0.15f) else ElectricSky.copy(alpha = 0.15f)),
                     contentAlignment = Alignment.Center
                 ) {
@@ -175,10 +190,10 @@ private fun HistoryItemRow(
                         imageVector = if (isVideo) Icons.Default.VideoFile else Icons.Default.Image,
                         contentDescription = null,
                         tint = if (isVideo) MintTeal else ElectricSky,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(22.dp)
                     )
                 }
-                Spacer(modifier = Modifier.width(10.dp))
+                Spacer(modifier = Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = job.outputFileName ?: job.source.displayName,
@@ -200,6 +215,26 @@ private fun HistoryItemRow(
                                 )
                             )
                         }
+                        job.sizeSavingsPercent?.let { savings ->
+                            if (savings > 0) {
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(4.dp))
+                                        .background(EmeraldSuccess.copy(alpha = 0.15f))
+                                        .padding(horizontal = 4.dp, vertical = 1.dp)
+                                ) {
+                                    Text(
+                                        text = "-$savings%",
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            color = EmeraldSuccess,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 9.sp
+                                        )
+                                    )
+                                }
+                            }
+                        }
                         job.details?.let { det ->
                             Text(
                                 text = " • $det",
@@ -214,35 +249,52 @@ private fun HistoryItemRow(
                     }
                 }
             }
+        }
 
-            // Open & Share actions
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(
-                    onClick = onOpen,
-                    modifier = Modifier
-                        .size(36.dp)
-                        .testTag("open_file_${job.id}")
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.OpenInNew,
-                        contentDescription = "Open Media",
-                        tint = ElectricSky,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-                IconButton(
-                    onClick = onShare,
-                    modifier = Modifier
-                        .size(36.dp)
-                        .testTag("share_file_${job.id}")
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Share,
-                        contentDescription = "Share Media",
-                        tint = MintTeal,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
+        Spacer(modifier = Modifier.height(10.dp))
+
+        // Actions Row
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            OutlinedButton(
+                onClick = onOpen,
+                modifier = Modifier
+                    .height(34.dp)
+                    .testTag("open_file_${job.id}"),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.OpenInNew,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Open", style = MaterialTheme.typography.labelSmall)
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Button(
+                onClick = onShare,
+                modifier = Modifier
+                    .height(34.dp)
+                    .testTag("share_file_${job.id}"),
+                shape = RoundedCornerShape(8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = WhatsAppGreen,
+                    contentColor = Color(0xFF032612)
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Send,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Share / Forward", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold))
             }
         }
     }

@@ -63,6 +63,27 @@ class PrivateMediaConverterTest {
     }
 
     @Test
+    fun `whatsapp forwarding - verify SEND and SEND_MULTIPLE intent filters exist for images and videos`() {
+        val sendIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+            type = "image/heic"
+        }
+        val resolveSendList = context.packageManager.queryIntentActivities(sendIntent, 0)
+        assertTrue(
+            "MainActivity must resolve ACTION_SEND for direct WhatsApp image forwarding",
+            resolveSendList.any { it.activityInfo.packageName == context.packageName }
+        )
+
+        val sendMultipleIntent = android.content.Intent(android.content.Intent.ACTION_SEND_MULTIPLE).apply {
+            type = "video/quicktime"
+        }
+        val resolveMultipleList = context.packageManager.queryIntentActivities(sendMultipleIntent, 0)
+        assertTrue(
+            "MainActivity must resolve ACTION_SEND_MULTIPLE for batch WhatsApp video forwarding",
+            resolveMultipleList.any { it.activityInfo.packageName == context.packageName }
+        )
+    }
+
+    @Test
     fun `photo conversion - produces genuine JPEG with SOI and EOI markers`() {
         runBlocking {
             // Create a test bitmap

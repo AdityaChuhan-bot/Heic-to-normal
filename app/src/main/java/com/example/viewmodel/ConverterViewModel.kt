@@ -29,7 +29,9 @@ data class ConverterUiState(
     val isPaused: Boolean = false,
     val settings: ConversionSettings = ConversionSettings(),
     val currentBatchOverallProgress: Float = 0f,
-    val toastMessage: String? = null
+    val toastMessage: String? = null,
+    val selectedTab: Int = 0,
+    val incomingShareNoticeCount: Int? = null
 )
 
 class ConverterViewModel(application: Application) : AndroidViewModel(application) {
@@ -355,5 +357,22 @@ class ConverterViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun dismissToast() {
         _uiState.update { it.copy(toastMessage = null) }
+    }
+
+    fun setSelectedTab(tab: Int) {
+        _uiState.update { it.copy(selectedTab = tab) }
+    }
+
+    fun setIncomingShareNotice(count: Int) {
+        _uiState.update {
+            it.copy(
+                incomingShareNoticeCount = count,
+                toastMessage = "Received $count item(s) from WhatsApp — Added to conversion queue!"
+            )
+        }
+    }
+
+    fun dismissIncomingShareNotice() {
+        _uiState.update { it.copy(incomingShareNoticeCount = null) }
     }
 }

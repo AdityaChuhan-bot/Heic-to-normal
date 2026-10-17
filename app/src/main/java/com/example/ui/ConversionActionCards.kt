@@ -213,7 +213,7 @@ private fun ActionCard(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        imageVector = Icons.Default.ArrowForward,
                         contentDescription = null,
                         modifier = Modifier.size(16.dp)
                     )

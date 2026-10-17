@@ -1,7 +1,6 @@
 package com.example.ui.theme
 
 import android.app.Activity
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
@@ -11,34 +10,34 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val PremiumDarkColorScheme = darkColorScheme(
+private val ObsidianDarkColorScheme = darkColorScheme(
     primary = ElectricSky,
     onPrimary = DarkSkyText,
-    primaryContainer = SlateCardVariant,
+    primaryContainer = ObsidianCardElevated,
     onPrimaryContainer = ElectricSky,
-    secondary = MintTeal,
-    onSecondary = DarkTealText,
-    secondaryContainer = SlateCardVariant,
-    onSecondaryContainer = MintTeal,
-    tertiary = VioletAccent,
-    background = SlateDarkBg,
+    secondary = WhatsAppGreen,
+    onSecondary = Color(0xFF032612),
+    secondaryContainer = ObsidianCardElevated,
+    onSecondaryContainer = WhatsAppGreen,
+    tertiary = MintTeal,
+    background = VoidDarkBg,
     onBackground = TextPrimary,
-    surface = SlateCardBg,
+    surface = ObsidianSurface,
     onSurface = TextPrimary,
-    surfaceVariant = SlateCardVariant,
+    surfaceVariant = ObsidianCard,
     onSurfaceVariant = TextSecondary,
-    outline = SlateBorder,
-    outlineVariant = SlateCardVariant,
+    outline = HairlineBorder,
+    outlineVariant = ObsidianCardElevated,
     error = CoralError,
     onError = Color(0xFF450A0A)
 )
 
 @Composable
 fun MyApplicationTheme(
-    darkTheme: Boolean = true, // Default to premium dark theme
+    darkTheme: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = PremiumDarkColorScheme
+    val colorScheme = ObsidianDarkColorScheme
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
@@ -46,8 +45,9 @@ fun MyApplicationTheme(
             if (window != null) {
                 window.statusBarColor = colorScheme.background.toArgb()
                 window.navigationBarColor = colorScheme.background.toArgb()
-                WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
-                WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = false
+                val controller = WindowCompat.getInsetsController(window, view)
+                controller.isAppearanceLightStatusBars = false
+                controller.isAppearanceLightNavigationBars = false
             }
         }
     }

@@ -3,7 +3,11 @@ package com.example.ui
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,12 +28,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.QuestionMark
-import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material.icons.filled.UploadFile
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -50,6 +54,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -61,14 +66,17 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.model.MediaType
 import com.example.storage.SafFileManager
 import com.example.ui.theme.ElectricSky
+import com.example.ui.theme.EmeraldSuccess
+import com.example.ui.theme.HairlineBorder
 import com.example.ui.theme.MintTeal
-import com.example.ui.theme.SlateBorder
-import com.example.ui.theme.SlateCardBg
-import com.example.ui.theme.SlateCardVariant
-import com.example.ui.theme.SlateDarkBg
+import com.example.ui.theme.ObsidianCard
+import com.example.ui.theme.ObsidianCardElevated
 import com.example.ui.theme.TextMuted
 import com.example.ui.theme.TextPrimary
 import com.example.ui.theme.TextSecondary
+import com.example.ui.theme.VoidDarkBg
+import com.example.ui.theme.WhatsAppGreen
+import com.example.ui.theme.WhatsAppGreenDim
 import com.example.viewmodel.ConverterViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,9 +88,9 @@ fun HomeScreen(
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-    var showHelpDialog by remember { mutableStateOf(false) }
+    var showWhatsAppGuide by remember { mutableStateOf(false) }
 
-    // SAF Multi-Document Pickers
+    // SAF Document Pickers
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenMultipleDocuments()
     ) { uris ->
@@ -125,7 +133,7 @@ fun HomeScreen(
         modifier = modifier
             .fillMaxSize()
             .windowInsetsPadding(WindowInsets.safeDrawing),
-        containerColor = SlateDarkBg,
+        containerColor = VoidDarkBg,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
@@ -136,8 +144,8 @@ fun HomeScreen(
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(28.dp)
-                                .clip(RoundedCornerShape(8.dp))
+                                .size(32.dp)
+                                .clip(RoundedCornerShape(10.dp))
                                 .background(ElectricSky.copy(alpha = 0.2f)),
                             contentAlignment = Alignment.Center
                         ) {
@@ -145,33 +153,54 @@ fun HomeScreen(
                                 imageVector = Icons.Default.Shield,
                                 contentDescription = null,
                                 tint = ElectricSky,
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(18.dp)
                             )
                         }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Private Media Converter",
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = TextPrimary
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "Private Media Converter",
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextPrimary,
+                                    fontSize = 17.sp
+                                )
                             )
-                        )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(6.dp)
+                                        .clip(CircleShape)
+                                        .background(WhatsAppGreen)
+                                )
+                                Spacer(modifier = Modifier.width(5.dp))
+                                Text(
+                                    text = "Direct WhatsApp Forwarding Ready",
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        color = WhatsAppGreen,
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                )
+                            }
+                        }
                     }
                 },
                 actions = {
                     IconButton(
-                        onClick = { showHelpDialog = true },
-                        modifier = Modifier.testTag("help_button")
+                        onClick = { showWhatsAppGuide = true },
+                        modifier = Modifier.testTag("whatsapp_guide_button")
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Info,
-                            contentDescription = "WhatsApp Guide",
-                            tint = TextSecondary
+                            imageVector = Icons.Default.Send,
+                            contentDescription = "WhatsApp Forward Guide",
+                            tint = WhatsAppGreen,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = SlateDarkBg
+                    containerColor = VoidDarkBg
                 )
             )
         }
@@ -180,95 +209,147 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            // Privacy Shield Banner
+            // Incoming WhatsApp Forward Banner (if media shared from WhatsApp)
+            item {
+                WhatsAppForwardBanner(
+                    count = uiState.incomingShareNoticeCount,
+                    onStartConversion = { viewModel.startBatch() },
+                    onDismiss = { viewModel.dismissIncomingShareNotice() }
+                )
+            }
+
+            // Privacy Security Status Pill
             item {
                 PrivacyBanner()
             }
 
-            // Hero Action Cards
+            // Studio Mode Switcher
             item {
-                ConversionActionCards(
-                    onSelectPhotosClick = {
-                        photoPickerLauncher.launch(
-                            arrayOf(
-                                "image/heic",
-                                "image/heif",
-                                "image/jpeg",
-                                "image/png",
-                                "image/webp",
-                                "image/*",
-                                "*/*"
-                            )
-                        )
-                    },
-                    onSelectVideosClick = {
-                        videoPickerLauncher.launch(
-                            arrayOf(
-                                "video/quicktime",
-                                "video/mp4",
-                                "video/*",
-                                "*/*"
-                            )
+                StudioSegmentedBar(
+                    selectedTab = uiState.selectedTab,
+                    onTabSelected = { viewModel.setSelectedTab(it) },
+                    queueCount = uiState.queue.size,
+                    historyCount = uiState.history.size
+                )
+            }
+
+            // Studio Hero & Selection based on active tab
+            item {
+                when (uiState.selectedTab) {
+                    0 -> {
+                        PhotoStudioHero(
+                            settings = uiState.settings,
+                            onSelectPhotosClick = {
+                                photoPickerLauncher.launch(
+                                    arrayOf(
+                                        "image/heic",
+                                        "image/heif",
+                                        "image/jpeg",
+                                        "image/png",
+                                        "image/webp",
+                                        "image/*",
+                                        "*/*"
+                                    )
+                                )
+                            },
+                            onQualityChange = { viewModel.updateJpegQuality(it) },
+                            onToggleStripGps = { viewModel.toggleStripGps(it) }
                         )
                     }
-                )
+                    1 -> {
+                        VideoStudioHero(
+                            settings = uiState.settings,
+                            onSelectVideosClick = {
+                                videoPickerLauncher.launch(
+                                    arrayOf(
+                                        "video/quicktime",
+                                        "video/mp4",
+                                        "video/*",
+                                        "*/*"
+                                    )
+                                )
+                            },
+                            onPresetChange = { viewModel.updateVideoPreset(it) }
+                        )
+                    }
+                    2 -> {
+                        // Vault Tab: Show completed history directly
+                        if (uiState.history.isEmpty()) {
+                            EmptyVaultCard(onSelectTab = { viewModel.setSelectedTab(it) })
+                        }
+                    }
+                }
             }
 
-            // Settings Card
+            // Output Folder Destination Bar
             item {
-                SettingsCard(
+                FolderDestinationBar(
                     settings = uiState.settings,
                     onSelectFolderClick = { folderPickerLauncher.launch(null) },
-                    onResetFolderClick = { viewModel.clearOutputFolder() },
-                    onQualityChange = { viewModel.updateJpegQuality(it) },
-                    onVideoPresetChange = { viewModel.updateVideoPreset(it) },
-                    onToggleStripGps = { viewModel.toggleStripGps(it) }
+                    onResetFolderClick = { viewModel.clearOutputFolder() }
                 )
             }
 
-            // Batch Queue Section
-            item {
-                BatchQueueSection(
-                    queue = uiState.queue,
-                    isProcessing = uiState.isProcessing,
-                    isPaused = uiState.isPaused,
-                    overallProgress = uiState.currentBatchOverallProgress,
-                    onStartBatch = { viewModel.startBatch() },
-                    onPauseBatch = { viewModel.pauseBatch() },
-                    onCancelAll = { viewModel.cancelAll() },
-                    onRetryJob = { viewModel.retryJob(it) },
-                    onRemoveJob = { viewModel.removeJob(it) },
-                    onClearCompleted = { viewModel.clearCompleted() }
-                )
-            }
-
-            // Completed History Section
-            item {
-                HistorySection(
-                    history = uiState.history,
-                    onOpenFile = { job ->
-                        job.outputUri?.let { uri ->
-                            val mime = if (job.source.mediaType == MediaType.VIDEO) "video/mp4" else "image/jpeg"
-                            SafFileManager.openFile(context, uri, mime)
-                        }
-                    },
-                    onShareFile = { job ->
-                        job.outputUri?.let { uri ->
-                            val mime = if (job.source.mediaType == MediaType.VIDEO) "video/mp4" else "image/jpeg"
-                            SafFileManager.shareFile(context, uri, mime, job.outputFileName)
-                        }
-                    },
-                    onClearHistory = { viewModel.clearHistory() }
-                )
-            }
-
-            // Empty state guide if queue and history are both empty
-            if (uiState.queue.isEmpty() && uiState.history.isEmpty()) {
+            // Active Batch Queue Section (always visible when queue has items)
+            if (uiState.queue.isNotEmpty()) {
                 item {
-                    EmptyStateCard()
+                    BatchQueueSection(
+                        queue = uiState.queue,
+                        isProcessing = uiState.isProcessing,
+                        isPaused = uiState.isPaused,
+                        overallProgress = uiState.currentBatchOverallProgress,
+                        onStartBatch = { viewModel.startBatch() },
+                        onPauseBatch = { viewModel.pauseBatch() },
+                        onCancelAll = { viewModel.cancelAll() },
+                        onRetryJob = { viewModel.retryJob(it) },
+                        onRemoveJob = { viewModel.removeJob(it) },
+                        onClearCompleted = { viewModel.clearCompleted() }
+                    )
+                }
+            }
+
+            // Converted History Section (visible in Vault tab or when history exists)
+            if (uiState.history.isNotEmpty() && uiState.selectedTab == 2) {
+                item {
+                    HistorySection(
+                        history = uiState.history,
+                        onOpenFile = { job ->
+                            job.outputUri?.let { uri ->
+                                val mime = if (job.source.mediaType == MediaType.VIDEO) "video/mp4" else "image/jpeg"
+                                SafFileManager.openFile(context, uri, mime)
+                            }
+                        },
+                        onShareFile = { job ->
+                            job.outputUri?.let { uri ->
+                                val mime = if (job.source.mediaType == MediaType.VIDEO) "video/mp4" else "image/jpeg"
+                                SafFileManager.shareFile(context, uri, mime, job.outputFileName)
+                            }
+                        },
+                        onClearHistory = { viewModel.clearHistory() }
+                    )
+                }
+            } else if (uiState.history.isNotEmpty() && uiState.selectedTab != 2) {
+                // Mini shortcut to history when in other tabs
+                item {
+                    HistorySection(
+                        history = uiState.history.take(3),
+                        onOpenFile = { job ->
+                            job.outputUri?.let { uri ->
+                                val mime = if (job.source.mediaType == MediaType.VIDEO) "video/mp4" else "image/jpeg"
+                                SafFileManager.openFile(context, uri, mime)
+                            }
+                        },
+                        onShareFile = { job ->
+                            job.outputUri?.let { uri ->
+                                val mime = if (job.source.mediaType == MediaType.VIDEO) "video/mp4" else "image/jpeg"
+                                SafFileManager.shareFile(context, uri, mime, job.outputFileName)
+                            }
+                        },
+                        onClearHistory = { viewModel.clearHistory() }
+                    )
                 }
             }
 
@@ -278,43 +359,44 @@ fun HomeScreen(
         }
     }
 
-    if (showHelpDialog) {
-        WhatsAppGuideDialog(onDismiss = { showHelpDialog = false })
+    if (showWhatsAppGuide) {
+        WhatsAppForwardGuideDialog(onDismiss = { showWhatsAppGuide = false })
     }
 }
 
 @Composable
-private fun EmptyStateCard() {
+private fun EmptyVaultCard(onSelectTab: (Int) -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp)),
-        colors = CardDefaults.cardColors(containerColor = SlateCardBg),
-        shape = RoundedCornerShape(18.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .border(1.dp, HairlineBorder, RoundedCornerShape(20.dp)),
+        colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = ObsidianCard),
+        shape = RoundedCornerShape(20.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
                 modifier = Modifier
-                    .size(48.dp)
+                    .size(52.dp)
                     .clip(CircleShape)
-                    .background(SlateCardVariant),
+                    .background(ObsidianCardElevated),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Default.UploadFile,
+                    imageVector = Icons.Default.Lock,
                     contentDescription = null,
-                    tint = ElectricSky,
+                    tint = EmeraldSuccess,
                     modifier = Modifier.size(26.dp)
                 )
             }
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(14.dp))
             Text(
-                text = "Ready to Convert",
+                text = "Vault is Empty",
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.Bold,
                     color = TextPrimary
@@ -322,59 +404,142 @@ private fun EmptyStateCard() {
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = "Tap 'Select Photos' or 'Select Videos' above to pick WhatsApp documents or iPhone media from your device.",
+                text = "Converted JPEG photos and MP4 videos will appear here with 1-tap forwarding to WhatsApp.",
                 style = MaterialTheme.typography.bodySmall.copy(
                     color = TextSecondary,
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                     lineHeight = 18.sp
                 )
             )
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = { onSelectTab(0) },
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Text("Start Converting Photos")
+            }
         }
     }
 }
 
 @Composable
-private fun WhatsAppGuideDialog(onDismiss: () -> Unit) {
-    androidx.compose.material3.AlertDialog(
+private fun WhatsAppForwardGuideDialog(onDismiss: () -> Unit) {
+    AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(
-                text = "iPhone & WhatsApp Guide",
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(WhatsAppGreenDim),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Send,
+                        contentDescription = null,
+                        tint = WhatsAppGreen,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(
+                    text = "Direct WhatsApp Forwarding",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary
+                    )
                 )
-            )
+            }
         },
         text = {
             Column(
                 modifier = Modifier
-                    .padding(vertical = 4.dp)
+                    .padding(vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = "Why do iPhone media files need conversion?",
-                    style = MaterialTheme.typography.labelMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = ElectricSky
+                    text = "You can forward images & videos directly from WhatsApp to this app in 3 quick steps:",
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = TextPrimary,
+                        fontWeight = FontWeight.Medium
                     )
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "• Photos: iPhones capture in Apple HEIC/HEIF format. When sent as 'Documents' on WhatsApp to preserve quality, Android apps cannot open or upload them without converting to JPEG.\n\n" +
-                            "• Videos: iPhones record in Apple QuickTime (.MOV) containers often with HEVC or display matrix rotation. Converting to universal MP4 ensures compatibility on all platforms.\n\n" +
-                            "• Zero-Trust Privacy: Your files never leave your Moto G85. Everything is decoded and encoded locally via offline platform APIs.",
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        color = TextSecondary,
-                        lineHeight = 18.sp
-                    )
+
+                GuideStep(
+                    number = "1",
+                    title = "In WhatsApp chat",
+                    desc = "Tap on the received iPhone photo (HEIC) or video (MOV) document."
+                )
+
+                GuideStep(
+                    number = "2",
+                    title = "Tap Share / Forward",
+                    desc = "Tap the Share icon (or 3-dots ➔ Share) in WhatsApp."
+                )
+
+                GuideStep(
+                    number = "3",
+                    title = "Select 'Private Media Converter'",
+                    desc = "The app opens immediately, queues your media, and converts it to universal JPEG/MP4!"
                 )
             }
         },
         confirmButton = {
-            androidx.compose.material3.Button(onClick = onDismiss) {
-                Text("Got It")
+            Button(
+                onClick = onDismiss,
+                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                    containerColor = WhatsAppGreen,
+                    contentColor = Color(0xFF032612)
+                )
+            ) {
+                Text("Got It", fontWeight = FontWeight.Bold)
             }
         },
-        containerColor = SlateCardBg
+        containerColor = ObsidianCard,
+        tonalElevation = 6.dp
     )
+}
+
+@Composable
+private fun GuideStep(
+    number: String,
+    title: String,
+    desc: String
+) {
+    Row(verticalAlignment = Alignment.Top) {
+        Box(
+            modifier = Modifier
+                .size(26.dp)
+                .clip(CircleShape)
+                .background(WhatsAppGreen.copy(alpha = 0.2f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = number,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = WhatsAppGreen
+                )
+            )
+        }
+        Spacer(modifier = Modifier.width(10.dp))
+        Column {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary
+                )
+            )
+            Text(
+                text = desc,
+                style = MaterialTheme.typography.bodySmall.copy(
+                    color = TextSecondary,
+                    fontSize = 12.sp,
+                    lineHeight = 16.sp
+                )
+            )
+        }
+    }
 }
