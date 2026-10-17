@@ -1,0 +1,6 @@
+{
+  "name": "Private Media Converter",
+  "description": "Offline-first native Android media converter for iPhone HEIC photos to JPEG and MOV videos to MP4 with privacy protection.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
